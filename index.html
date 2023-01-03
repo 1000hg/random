@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>롤 내전 팀짜기</title>
+        <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    </head>
+    <body>
+        <input type="text" id="members" style ="width: 500px; height: 20px; " placeholder="ex)우리, 누누, 북복....">
+        <button onclick="member_add()">팀원 추가</button>
+        <div>콤마 단위로 넣기</div>
+
+        <div style="margin-top: 20px; margin-right: 30px; float:left" id="team1"></div>
+        <div style="margin-top: 20px;" id="team2"></div>
+    </body>
+    <script>
+        function member_add() {
+            $("#team1").empty();
+            $("#team2").empty();
+
+            let members = $("#members").val();
+            let members_split = members.split(',');
+            if (members_split.length > 10) {
+                alert("10명 이상은 불가능")
+                return;
+            }
+
+            let suffleMembers = members_split.sort(() => Math.random() - 0.5);
+            
+            suffleMembers.forEach((element, index) => {
+                if (index < 5) {
+                    $('#team1').append('<div>'+element+'</div>');
+                } else {
+                    $('#team2').append('<div>'+element+'</div>');
+                }
+            });
+        }
+    </script>
+</html>
