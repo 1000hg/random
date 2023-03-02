@@ -11,11 +11,28 @@
         <button onclick="member_add()" style="margin-left: 10px; padding: 10px; font-size: 16px; background-color: #4CAF50; color: #fff; border: none; border-radius: 4px; cursor: pointer;">팀 나누기</button>
         <div style="font-size: 14px; margin-top: 10px; color: #999;">팀원 이름을 콤마로 구분하여 입력해주세요.</div>
 
+        <div style="height: 200px;">
+            <div style="margin-right: 30px; float:left; font-size:20px;" id="team1"></div>
+            <div style="margin-top: 20px; font-size:20px;" id="team2"></div>
+        </div>
 
-        <div style="margin-top: 20px; margin-right: 30px; float:left; font-size:20px;" id="team1"></div>
-        <div style="margin-top: 20px; font-size:20px;" id="team2"></div>
+
+
+        <hr>
+        <div style="font-size: 14px; margin-top: 10px; color: #999;">히스토리를 클릭하면 바로 입력이 됩니다.</div>
+        <button onclick="deleteDB();">히스토리 날리기</button>
+
+        <div style="margin-top: 20px; font-size:20px;" id="history"></div>
     </body>
     <script>
+        window.onload = function(){
+            selectData();
+        }
+        const db = openDatabase('mydb', '1.0', 'My Database', 2 * 1024 * 1024);
+        db.transaction(function (tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, value TEXT unique, created_at)');
+        });
+
         function member_add() {
             $("#team1").empty();
             $("#team2").empty();
@@ -36,6 +53,48 @@
                     $('#team2').append('<div>'+element+'</div>');
                 }
             });
+
+            if ($("#members").val() != "")
+                insertData($("#members").val());
+
+            selectData();
         }
+
+        const TIMER = 60 * 60 * 1000;
+
+        setTimeout(function() {
+            db.transaction(function(tx) {
+                tx.executeSql('DELETE FROM users WHERE created_at < ?', [Date.now() - TIMER]);
+            });
+        }, TIMER);
+
+        function insertData(data) {
+            db.transaction(function (tx) {
+                tx.executeSql('INSERT INTO users (value, created_at) VALUES (?, ?)', [data, new Date()]);
+            });
+        }
+
+        function selectData() {
+            $("#history").empty();
+            db.transaction(function (tx) {
+                tx.executeSql('SELECT * FROM users limit 5', [], function (tx, results) {
+                const len = results.rows.length;
+                for (let i = 0; i < len; i++) {
+                    console.log(results.rows.item(i));
+                    $('#history').append('<div class="history_items">'+results.rows.item(i).value +'</div>');
+                }
+                }, null);
+            });
+        }
+
+        function deleteDB() {
+            db.transaction(function(tx) {
+                tx.executeSql('DROP TABLE IF EXISTS users');
+            });
+        }
+
+        $('#history').on('click', '.history_items', function() {
+            $("#members").val($(this).html());
+        });
     </script>
 </html>
