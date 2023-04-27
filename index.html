@@ -9,7 +9,9 @@
     <body>
         <input type="text" id="members" style="width: 700px; height: 40px; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;" placeholder="팀원 이름을 입력하세요(콤마로 구분)">
         <button onclick="member_add()" style="margin-left: 10px; padding: 10px; font-size: 16px; background-color: #4CAF50; color: #fff; border: none; border-radius: 4px; cursor: pointer;">팀 나누기</button>
+        <div style="margin-top: 10px;"><button id="swap">위치 스왑</button></div>
         <div style="font-size: 14px; margin-top: 10px; color: #999;">팀원 이름을 콤마로 구분하여 입력해주세요.</div>
+        <div style="font-size: 14px; margin-top: 10px; color: #999;">- 각각의 팀원 클릭 후 [위치스왑] 버튼 클릭시 둘의 위치 변경</div>
 
         <div style="height: 200px;">
             <div style="margin-right: 30px; float:left; font-size:20px;" id="team1"></div>
@@ -33,6 +35,9 @@
             tx.executeSql('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, value TEXT unique, created_at)');
         });
 
+        let swapArray = ["", ""];
+        let swapDom = ["", ""];
+        
         function member_add() {
             $("#team1").empty();
             $("#team2").empty();
@@ -48,12 +53,27 @@
             
             suffleMembers.forEach((element, index) => {
                 if (index < 5) {
-                    $('#team1').append('<div>'+element+'</div>');
+                    $('#team1').append('<div class="team1_child">'+element+'</div>');
                 } else {
-                    $('#team2').append('<div>'+element+'</div>');
+                    $('#team2').append('<div class="team2_child">'+element+'</div>');
                 }
             });
 
+            $(".team1_child").on("click",function(){
+                swapArray[0] = $(this).text();
+                swapDom[0] = $(this);
+                $(this).css("color", "red");
+                $(".team1_child").not(this).css("color", "");
+            });
+
+            $(".team2_child").on("click",function(){
+                swapArray[1] = $(this).text();
+                swapDom[1] = $(this);
+                $(this).css("color", "red");
+                $(".team2_child").not(this).css("color", "");
+            });
+
+            
             if ($("#members").val() != "")
                 insertData($("#members").val());
 
@@ -80,7 +100,6 @@
                 tx.executeSql('SELECT * FROM users limit 5', [], function (tx, results) {
                 const len = results.rows.length;
                 for (let i = 0; i < len; i++) {
-                    console.log(results.rows.item(i));
                     $('#history').append('<div class="history_items">'+results.rows.item(i).value +'</div>');
                 }
                 }, null);
@@ -96,5 +115,24 @@
         $('#history').on('click', '.history_items', function() {
             $("#members").val($(this).html());
         });
+
+
+        $("#swap").on('click', function() {
+            if (swapDom[0] == "" || swapDom[1] == "") {
+                alert("선택을 똑바로 해주세요");
+                return;
+            }
+                
+            swapDom[0].text(swapArray[1]);
+            swapDom[1].text(swapArray[0]);
+
+            swapDom[0] = "";
+            swapDom[1] = "";
+            swapArray[0] = "";
+            swapArray[1] = "";
+            $(".team1_child, .team2_child").css("color", "")
+        })
+
+
     </script>
 </html>
