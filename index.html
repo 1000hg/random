@@ -21,8 +21,6 @@
 
 
         <hr>
-        <div style="font-size: 14px; margin-top: 10px; color: #999;">히스토리를 클릭하면 바로 입력이 됩니다.</div>
-        <button onclick="deleteDB();">히스토리 날리기</button>
 
         <div style="margin-top: 20px; font-size:20px;" id="history"></div>
     </body>
@@ -30,10 +28,6 @@
         window.onload = function(){
             selectData();
         }
-        const db = openDatabase('mydb', '1.0', 'My Database', 2 * 1024 * 1024);
-        db.transaction(function (tx) {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, value TEXT unique, created_at)');
-        });
 
         let swapArray = ["", ""];
         let swapDom = ["", ""];
@@ -79,42 +73,6 @@
 
             selectData();
         }
-
-        const TIMER = 30 * 1000 * 60 * 60 * 24;
-
-        setTimeout(function() {
-            db.transaction(function(tx) {
-                tx.executeSql('DELETE FROM users WHERE created_at < ?', [Date.now() - TIMER]);
-            });
-        }, TIMER);
-
-        function insertData(data) {
-            db.transaction(function (tx) {
-                tx.executeSql('INSERT INTO users (value, created_at) VALUES (?, ?)', [data, new Date()]);
-            });
-        }
-
-        function selectData() {
-            $("#history").empty();
-            db.transaction(function (tx) {
-                tx.executeSql('SELECT * FROM users limit 5', [], function (tx, results) {
-                const len = results.rows.length;
-                for (let i = 0; i < len; i++) {
-                    $('#history').append('<div class="history_items">'+results.rows.item(i).value +'</div>');
-                }
-                }, null);
-            });
-        }
-
-        function deleteDB() {
-            db.transaction(function(tx) {
-                tx.executeSql('DROP TABLE IF EXISTS users');
-            });
-        }
-
-        $('#history').on('click', '.history_items', function() {
-            $("#members").val($(this).html());
-        });
 
 
         $("#swap").on('click', function() {
